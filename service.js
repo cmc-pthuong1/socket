@@ -14,9 +14,8 @@ class DeviceService {
 
   disconnectDevice(data, socket) {
     const { deviceId } = data;
-    console.log("A device disconnected:", socket.key);
     for (const id in this.devices) {
-      if (this.devices[id].socketId === socket.key && id == deviceId) {
+      if (this.devices[id].socketId === socket.id && id == deviceId) {
         delete this.devices[deviceId];
         console.log("Device unregistered:", deviceId);
         break;
@@ -25,9 +24,8 @@ class DeviceService {
   }
 
   disconnect(socket) {
-    console.log("A device disconnected:", socket.key);
     for (const deviceId in this.devices) {
-      if (this.devices[deviceId].socketId === socket.key) {
+      if (this.devices[deviceId].socketId === socket.id) {
         delete this.devices[deviceId];
         console.log("Device unregistered:", deviceId);
         break;
