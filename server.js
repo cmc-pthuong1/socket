@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const DeviceService = require("./service.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -11,28 +12,31 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", (socket) => {
-  console.log("A user connected");
+// Khởi tạo DeviceService
+const deviceService = new DeviceService({ io });
 
-  setInterval(() => {
-    const messageObject = {
-      t: (Math.random() + 25).toFixed(1),
-      p: (Math.random() + 1).toFixed(1),
-      q: (Math.random() * 5 + 1).toFixed(1),
-      timestamp: new Date().toISOString(),
-    };
-    socket.emit("message", messageObject);
-  }, 2000);
+// Khi một thiết bị kết nối
+io.on("connection", (socket) => {
+  console.log("A device connected:", socket.id);
+
+  // Đăng ký thiết bị
+  socket.on("registerDevice", (data) => {
+    deviceService.registerDevice(data, socket);
+  });
+
+  // Ngắt kết nối
+  socket.on("disconnectDevice", (data) => {
+    deviceService.disconnectDevice(data, socket);
+  });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
-
-  socket.on("message", (msg) => {
-    console.log("Message received: " + msg);
-    io.emit("message", msg); // Phát lại tin nhắn cho tất cả người dùng
+    deviceService.disconnect(socket);
+    console.log("A device disconnect");
   });
 });
+
+// Bắt đầu gửi sự kiện
+deviceService.startSendingEvents(io);
 
 server.listen(3000, () => {
   console.log("Socket server is running on http://localhost:3000");
