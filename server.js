@@ -29,6 +29,11 @@ io.on("connection", (socket) => {
     deviceService.disconnectDevice(data, socket);
   });
 
+  socket.on("disconnectDiagram", () => {
+    deviceService.disconnect(socket);
+    console.log("A device disconnect");
+  });
+
   socket.on("disconnect", () => {
     deviceService.disconnect(socket);
     console.log("A device disconnect");
